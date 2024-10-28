@@ -1,20 +1,28 @@
-// Zadanie 1: Wybierz niezbędne elementy DOM
-// Przykład: Musisz uzyskać odniesienia do elementów takich jak input pliku, przycisk, img i canvas.
-// Wskazówka: Użyj document.getElementById lub podobnych metod, aby uzyskać elementy po ich ID.
-
-// Zadanie 2: Dodaj nasłuchiwacz zdarzeń dla przesyłania obrazu
-// Kiedy użytkownik wybierze obraz, wyświetl go w elemencie <img>.
-// Wskazówka: Możesz użyć API FileReader, aby odczytać plik jako URL danych.
-
-// Zadanie 3: Dodaj nasłuchiwacz zdarzeń do przycisku „Konwertuj na odcienie szarości”
-// Po kliknięciu, skonwertuj wyświetlany obraz na odcienie szarości i pokaż go w elemencie <canvas>.
-// Wskazówka: Musisz użyć elementu canvas i jego kontekstu (2D) oraz zmodyfikować dane pikseli.
-
-// Zadanie 4: Narysuj przesłany obraz na canvasie
-// Wskazówka: Użyj drawImage() w kontekście canvasa, aby narysować obraz. Upewnij się, że rozmiar canvasa odpowiada rozmiarowi obrazu.
-
-// Zadanie 5: Skonwertuj obraz na odcienie szarości poprzez manipulowanie danymi pikseli
-// Wskazówka: Użyj getImageData() do pobrania danych pikseli, zastosuj formułę dla odcieni szarości, a następnie użyj putImageData(), aby zaktualizować canvas.
-
-// Zadanie opcjonalne: Zastanów się, co się stanie, jeśli nie zostanie przesłany żaden obraz, a przycisk odcieni szarości zostanie kliknięty.
-// Wskazówka: Możesz sprawdzić, czy obraz został przesłany, zanim zastosujesz filtr odcieni szarości.
+const fileInput = document.getElementById("imageUpload");
+const imgView = document.getElementById("uploadedImage");
+const greyConvert = document.getElementById("convertGrayscale");
+const greyView = document.getElementById("grayscaleImage");
+const reader = new FileReader();
+fileInput.addEventListener("change", function(e){
+    reader.addEventListener("load",() => {
+        imgView.src = reader.result;
+    });
+    reader.readAsDataURL(e.target.files[0]);
+});
+greyConvert.addEventListener("click",() => {
+    if (imgView.src!=""){
+        greyView.width = imgView.naturalWidth;
+        greyView.height = imgView.naturalHeight;
+        let ctx=greyView.getContext("2d",{ willReadFrequently: true });
+        ctx.drawImage(imgView, 0, 0, ctx.canvas.width, ctx.canvas.height);
+        let imgDetails = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+        let imgPxs = imgDetails.data;
+        for (var i = 0; i < imgPxs.length; i += 4) {
+            let pxLightness = parseInt((imgPxs[i] + imgPxs[i + 1] + imgPxs[i + 2]) / 3);
+            imgPxs[i] = pxLightness;
+            imgPxs[i + 1] = pxLightness;
+            imgPxs[i + 2] = pxLightness;
+        };
+        ctx.putImageData(imgDetails, 0, 0);
+    };
+});
